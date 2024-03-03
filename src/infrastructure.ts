@@ -1,9 +1,9 @@
-import { getSecret } from "@aws-lambda-powertools/parameters/secrets";
-import { Transform } from "@aws-lambda-powertools/parameters";
-import { Logger } from "@aws-lambda-powertools/logger";
+import { getSecret } from '@aws-lambda-powertools/parameters/secrets';
+import { Transform } from '@aws-lambda-powertools/parameters';
+import { Logger } from '@aws-lambda-powertools/logger';
 
 const logger = new Logger({
-  logLevel: "INFO",
+  logLevel: 'INFO',
 });
 
 export type DbSecret = {
@@ -46,7 +46,7 @@ export type CobrainerSecret = {
 
 // istanbul ignore next
 export async function getAWSSecret<T>(secret_name: string): Promise<T> {
-  logger.info("accessing db credentials");
+  logger.info('accessing db credentials');
   const secret = await getSecret(secret_name, {
     transform: Transform.JSON,
   });

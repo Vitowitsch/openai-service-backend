@@ -1,12 +1,12 @@
-import { getAWSSecret } from "../src/infrastructure";
-import { getSecret } from "@aws-lambda-powertools/parameters/secrets";
-import { Transform } from "@aws-lambda-powertools/parameters";
+import { getAWSSecret } from '../src/infrastructure';
+import { getSecret } from '@aws-lambda-powertools/parameters/secrets';
+import { Transform } from '@aws-lambda-powertools/parameters';
 
-jest.mock("stream");
-jest.mock("@aws-lambda-powertools/parameters/secrets");
+jest.mock('stream');
+jest.mock('@aws-lambda-powertools/parameters/secrets');
 
-describe("Infrastructure Tests", () => {
-  describe("getSecrets", () => {
+describe('Infrastructure Tests', () => {
+  describe('getSecrets', () => {
     // it("should return secrets", async () => {
     //   const mockSecrets = {
     //     username: "testUser",
@@ -23,17 +23,17 @@ describe("Infrastructure Tests", () => {
     //   expect(result).toEqual(mockSecrets);
     // });
 
-    it("should default secret when SECRET_NAME is undefined", async () => {
+    it('should default secret when SECRET_NAME is undefined', async () => {
       const mockSecrets = {
-        username: "testUser",
-        password: "testPassword",
-        host: "testHost",
+        username: 'testUser',
+        password: 'testPassword',
+        host: 'testHost',
       };
       delete process.env.SECRET_NAME;
       (getSecret as jest.Mock).mockResolvedValue(mockSecrets);
 
-      await getAWSSecret("dbsec");
-      expect(getSecret).toHaveBeenCalledWith("dbsec", {
+      await getAWSSecret('dbsec');
+      expect(getSecret).toHaveBeenCalledWith('dbsec', {
         transform: Transform.JSON,
       });
     });

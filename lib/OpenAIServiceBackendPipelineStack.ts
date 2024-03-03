@@ -1,7 +1,12 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { Role, ServicePrincipal, PolicyStatement, ManagedPolicy } from 'aws-cdk-lib/aws-iam';
-import * as codecommit from 'aws-cdk-lib/aws-codecommit';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import {
+  Role,
+  ServicePrincipal,
+  PolicyStatement,
+  ManagedPolicy,
+} from 'aws-cdk-lib/aws-iam';
 import {
   CodePipelineSource,
   CodePipeline,
@@ -9,7 +14,6 @@ import {
 } from 'aws-cdk-lib/pipelines';
 import { AppStage } from './AppStage';
 import { aws_s3 as s3 } from 'aws-cdk-lib';
-import { Repository } from 'aws-cdk-lib/aws-ecr';
 
 interface MyStackProps extends cdk.StackProps {
   env: {
@@ -23,22 +27,28 @@ export class OpenAIServiceBackendPipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: MyStackProps) {
     super(scope, id, props);
 
-    const repository = Repository.fromRepositoryName(
-      this,
-      'ImportedRepo',
-      'openai-service-backend',
-    );
-
-    const repo ='Vitowitsch/copenai-service-backend';
+    const repo = 'Vitowitsch/copenai-service-backend';
 
     const pipelineRole = new Role(this, 'pipeRole', {
       assumedBy: new ServicePrincipal('codepipeline.amazonaws.com'),
     });
+
     pipelineRole.addManagedPolicy(
-      ManagedPolicy.fromAwsManagedPolicyName('SecretsManagerReadWrite')
+      ManagedPolicy.fromAwsManagedPolicyName('SecretsManagerReadWrite'),
     );
 
-    const githubToken = cdk.SecretValue.secretsManager('githubToken', {  
+    const githubWebhookPolicyStatement = new iam.PolicyStatement({
+      actions: [
+        'codepipeline:PutWebhook',
+        'codepipeline:UpdateWebhook',
+        'codepipeline:RegisterWebhookWithThirdParty',
+      ],
+      resources: ['*'],
+    });
+
+    pipelineRole.addToPolicy(githubWebhookPolicyStatement);
+
+    const githubToken = cdk.SecretValue.secretsManager('githubToken', {
       jsonField: 'GITHUB_TOKEN',
     });
 
@@ -49,7 +59,9 @@ export class OpenAIServiceBackendPipelineStack extends cdk.Stack {
       dockerEnabledForSelfMutation: true,
       artifactBucket: props.env.bucketArtifacts,
       synth: new ShellStep('Synth', {
-        input: CodePipelineSource.gitHub(repo, 'main', {authentication: githubToken }),
+        input: CodePipelineSource.gitHub(repo, 'main', {
+          authentication: githubToken,
+        }),
         commands: [
           'npm ci',
           'npm run check-format',
