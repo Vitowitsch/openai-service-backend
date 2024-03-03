@@ -22,6 +22,6 @@ AWS lambda ecapulating the call to openai-API with token secured in AWS paramete
 ## Local testing
 - docker installed (need to cdk synth NodejsFunction, if you want to test it locally)
 - `pip install aws-sam-cli` (as elevated user)
-- `cdk synth`
+- `cdk synth OpenAiServiceBackendPipelineStack --profile priv-acc --region='eu-central-1'`
 - `sam local invoke OpenAIServiceBackendLambda`
   - Note that this is not a simulation, but uses real AWS ressources.
