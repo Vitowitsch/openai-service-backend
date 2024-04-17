@@ -102,7 +102,5 @@ export class OpenAiServiceBackendPipelineStack extends cdk.Stack {
         },
       }),
     );
-
-    pipeline.buildPipeline();
   }
 }
