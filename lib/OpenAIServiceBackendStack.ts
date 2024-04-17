@@ -5,10 +5,9 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
-import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+// import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 
-
-export class OpenAIServiceBackendStack extends cdk.Stack {
+export class OpenAiServiceBackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -16,14 +15,14 @@ export class OpenAIServiceBackendStack extends cdk.Stack {
     const lambdaFct = this.createNodejsFunction(lambdaExecutionRole);
 
     const apiName = 'OpenAiRestApi';
-    const api = new LambdaRestApi(scope, apiName, {
+    const api = new LambdaRestApi(this, apiName, {
       restApiName: apiName,
       description:
         'used to provide access to the backend to encapsulate the chatgpt token',
       handler: lambdaFct,
     });
     const endpointName = 'EndpointURL4OpenAiBackend';
-    new ssm.StringParameter(scope, endpointName, {
+    new ssm.StringParameter(this, endpointName, {
       parameterName: endpointName,
       stringValue: api.url,
       description: `The URL for Lambda Gateway of openai backend.`,

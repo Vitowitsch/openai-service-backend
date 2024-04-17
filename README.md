@@ -12,9 +12,11 @@ AWS lambda ecapulating the call to openai-API with token secured in AWS paramete
     * `$env:CDK_DEFAULT_REGION="eu-central-1"`
     * `$env:AWS_DEFAULT_PROFILE=""`
 
-
+-  `cdk bootstrap --profile priv-acc --trust=$CDK_DEFAULT_ACCOUNT --cloudformation-execution-policies=arn:aws:iam::aws:policy/AdministratorAccess --verbose`
+-  
+-  cdk deploy OpenAiServiceBackendPipelineStack --profile priv-acc
 ## Initial Deployment
-* Manual deployment was performed once to install the Code Pipeline: `cdk deploy OpenAIServiceBackendPipelineStack`
+* Manual deployment was performed once to install the Code Pipeline: `cdk deploy OpenAiServiceBackendPipelineStack`
 * Changes can now be applied again manually or by merging the change to the master branch. 
   This will automatically trigger the pipeline for the new deployment.
 
@@ -23,5 +25,5 @@ AWS lambda ecapulating the call to openai-API with token secured in AWS paramete
 - docker installed (need to cdk synth NodejsFunction, if you want to test it locally)
 - `pip install aws-sam-cli` (as elevated user)
 - `cdk synth OpenAiServiceBackendPipelineStack --profile priv-acc --region='eu-central-1'`
-- `sam local invoke OpenAIServiceBackendLambda`
+- `sam local invoke OpenAiServiceBackendLambda`
   - Note that this is not a simulation, but uses real AWS ressources.

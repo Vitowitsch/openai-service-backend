@@ -23,7 +23,7 @@ interface MyStackProps extends cdk.StackProps {
   };
 }
 
-export class OpenAIServiceBackendPipelineStack extends cdk.Stack {
+export class OpenAiServiceBackendPipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: MyStackProps) {
     super(scope, id, props);
 
@@ -51,6 +51,8 @@ export class OpenAIServiceBackendPipelineStack extends cdk.Stack {
     const githubToken = cdk.SecretValue.secretsManager('githubToken', {
       jsonField: 'GITHUB_TOKEN',
     });
+
+    console.log('githubToken', githubToken.toString());
 
     const pipelineName = `OpenAIServiceBackendPipeline`;
 
