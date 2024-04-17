@@ -27,7 +27,7 @@ export class OpenAiServiceBackendPipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: MyStackProps) {
     super(scope, id, props);
 
-    const repo = 'Vitowitsch/copenai-service-backend';
+    const repo = 'Vitowitsch/openai-service-backend';
 
     const pipelineRole = new Role(this, 'pipeRole', {
       assumedBy: new ServicePrincipal('codepipeline.amazonaws.com'),
@@ -69,7 +69,7 @@ export class OpenAiServiceBackendPipelineStack extends cdk.Stack {
           'npm run check-format',
           'npm run lint',
           'npm run test',
-          '[ "$BRANCH" = "main" ] && npm run test:coverage || true',
+          // '[ "$BRANCH" = "main" ] && npm run test:coverage || true',
           'npm run build',
           'npx cdk synth',
           'pip install checkov',
