@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { ArtifactBucketStack } from '../lib/ArtifactBucketStack';
-import { OpenAiServiceBackendPipelineStack } from '../lib/OpenAiServiceBackendPipelineStack';
+import { OpenAiServiceBackendPipelineStack } from '../lib/OpeniServiceBackendPipelineStack';
 
 const app = new cdk.App();
 const artifactStack = new ArtifactBucketStack(
