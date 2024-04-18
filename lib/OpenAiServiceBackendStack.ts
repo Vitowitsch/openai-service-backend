@@ -58,7 +58,7 @@ export class OpenAiServiceBackendStack extends cdk.Stack {
       entry: 'src/index.ts',
       handler: 'handler',
       runtime: lambda.Runtime.NODEJS_18_X,
-      memorySize: 8192,
+      memorySize: 128,
       timeout: cdk.Duration.seconds(900),
       role: lambdaExecutionRole,
 
