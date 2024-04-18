@@ -7,21 +7,26 @@ const logger = new Logger({
   logLevel: 'INFO',
 });
 
+interface OpenAiSecret {
+  GPT_TOKEN: string;
+}
+
 export async function handler(event: APIGatewayProxyEvent) {
   logger.info('Received event:', JSON.stringify(event));
   try {
-    const openaiApiKey = getAWSSecret('apenai-gpt-token');
+    const openaiApiKey = getAWSSecret<OpenAiSecret>('apenai-gpt-token');
+
     const userPrompt = JSON.parse(event.body!).prompt;
     const openaiResponse = await axios.post(
-      'https://api.openai.com/v1/completions',
+      'https://api.openai.com/v1/chat/completions',
       {
-        model: 'gpt-3.5-turbo',
+        model: 'openai-4',
         prompt: userPrompt,
         max_tokens: 100,
       },
       {
         headers: {
-          Authorization: `Bearer ${openaiApiKey}`,
+          Authorization: `Bearer ${(await openaiApiKey).GPT_TOKEN}`,
         },
       },
     );
