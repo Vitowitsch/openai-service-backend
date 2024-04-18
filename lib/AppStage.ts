@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { OpenAiServiceBackendStack } from './OpenAiServiceBackendStack';
+import { OpenAiServiceBackendStack } from './OpenAiServiceBackendStac';
 
 export class AppStage extends cdk.Stage {
   constructor(
