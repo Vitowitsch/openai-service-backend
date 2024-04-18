@@ -45,8 +45,10 @@ export class OpenAiServiceBackendStack extends cdk.Stack {
     );
     lambdaExecutionRole.addToPolicy(
       new iam.PolicyStatement({
-        actions: ['ssm:GetParameter'],
-        resources: [`arn:aws:ssm:${this.region}:${this.account}:parameter/*`],
+        actions: ['secretsmanager:GetSecretValue', 'ssm:GetParameter'],
+        resources: [
+          'arn:aws:secretsmanager:eu-central-1:944997240237:secret:apenai-gpt-token-y2brc7',
+        ],
       }),
     );
 
@@ -61,7 +63,6 @@ export class OpenAiServiceBackendStack extends cdk.Stack {
       memorySize: 128,
       timeout: cdk.Duration.seconds(900),
       role: lambdaExecutionRole,
-
       environment: {
         REGION: this.region,
       },
