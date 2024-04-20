@@ -27,7 +27,7 @@ export async function handler(event: APIGatewayProxyEvent) {
         model: 'openai-4',
         max_tokens: 100,
         messages: [
-          { role: 'assistant', content: websiteContent },
+          // { role: 'assistant', content: websiteContent },
           { role: 'user', content: userMsg },
         ],
       },
