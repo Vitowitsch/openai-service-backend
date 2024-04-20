@@ -2,6 +2,7 @@ import { Logger } from '@aws-lambda-powertools/logger';
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import axios from 'axios';
 import { getAWSSecret } from './infrastructure';
+import { retrieveHomePageContent } from './homepage_content';
 
 const logger = new Logger({
   logLevel: 'INFO',
@@ -14,18 +15,25 @@ interface OpenAiSecret {
 export async function handler(event: APIGatewayProxyEvent) {
   logger.info('Received event:', JSON.stringify(event));
   try {
+    const websiteContent = await retrieveHomePageContent();
+
     const openaiApiKey = getAWSSecret<OpenAiSecret>('apenai-gpt-token');
 
-    const userPrompt = JSON.parse(event.body!).prompt;
+    const userMsg = JSON.parse(event.body!).text;
+
     const openaiResponse = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
         model: 'openai-4',
-        prompt: userPrompt,
         max_tokens: 100,
+        messages: [
+          { role: 'assistant', content: websiteContent },
+          { role: 'user', content: userMsg },
+        ],
       },
       {
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${(await openaiApiKey).GPT_TOKEN}`,
         },
       },
