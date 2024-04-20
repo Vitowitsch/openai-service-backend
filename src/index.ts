@@ -2,10 +2,10 @@ import { Logger } from '@aws-lambda-powertools/logger';
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import axios from 'axios';
 import { getAWSSecret } from './infrastructure';
-import { retrieveHomePageContent } from './homepage_content';
+// import { retrieveHomePageContent } from './homepage_content';
 
 const logger = new Logger({
-  logLevel: 'INFO',
+  logLevel: 'DEBUG',
 });
 
 interface OpenAiSecret {
@@ -15,7 +15,7 @@ interface OpenAiSecret {
 export async function handler(event: APIGatewayProxyEvent) {
   logger.info('Received event:', JSON.stringify(event));
   try {
-    const websiteContent = await retrieveHomePageContent();
+    // const websiteContent = await retrieveHomePageContent();
 
     const openaiApiKey = getAWSSecret<OpenAiSecret>('apenai-gpt-token');
 
