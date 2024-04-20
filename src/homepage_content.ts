@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Logger } from '@aws-lambda-powertools/logger';
+import { JSDOM } from 'jsdom';
 
 const logger = new Logger({
   logLevel: 'INFO',
@@ -40,10 +41,10 @@ export async function retrieveHomePageContent(): Promise<string> {
   }
 }
 
-// Extract text content from HTML string
+// Extract text content from HTML string using jsdom
 function extractTextFromHTML(html: string): string {
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  return doc.body.textContent || '';
+  const dom = new JSDOM(html);
+  return dom.window.document.body.textContent || '';
 }
 
 // Fetch HTML content from a provided URL
@@ -54,22 +55,19 @@ async function fetchHtmlContent(url: string): Promise<string> {
     );
     return response.data;
   } catch (error) {
-    console.error('Error fetching data:', error);
-    // Assuming you have some way to update chat messages, you might need to pass this function or manage it differently
-    // chatMessages.push({ role: 'assistant', content: 'Error: Unable to fetch website content.' });
+    const errMsg = `Error fetching HTML content for ${url}: ${error instanceof Error ? error.message : String(error)}`;
+    logger.error(errMsg);
     throw new Error('Unable to fetch website content');
   }
 }
 
-// Extract URLs from HTML text
+// Extract URLs from HTML text using jsdom
 function extractUrlsFromHTML(html: string): string[] {
   const regex = /href="#\/blog\/([^"]+)"/g;
-  let matches;
-  const urls: string[] = [];
-
-  while ((matches = regex.exec(html)) !== null) {
-    urls.push(`https://www.botsandbytes.de/#${matches[1]}`);
-  }
-
+  const matches = html.match(regex) || [];
+  const urls: string[] = matches.map(
+    (match) =>
+      `https://www.botsandbytes.de/#${match.replace('href="#', '').replace('"', '')}`,
+  );
   return urls;
 }

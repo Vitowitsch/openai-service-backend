@@ -11,7 +11,7 @@
     "lint": "npx eslint \"**/*.{ts,tsx}\" --quiet --fix",
     "format": "prettier --write '**/*.{ts,tsx,json}'",
     "check-format": "prettier --check '**/*.{ts,tsx,json}'",
-    "sonar-qube": "npx sonarqube-scanner"
+    "localrun": "ts-node -e \"require('./test/localrun.ts').localRun()\""
   },
   "dependencies": {
     "@aws-lambda-powertools/logger": "^1.11.0",
@@ -32,6 +32,7 @@
     "fs": "^0.0.1-security",
     "https": "^1.0.0",
     "iconv-lite": "^0.6.3",
+    "jsdom": "^24.0.0",
     "pg": "^8.11.3",
     "prettier": "^3.0.3",
     "tar": "^6.1.15",
@@ -40,6 +41,7 @@
   "devDependencies": {
     "@babel/preset-typescript": "^7.22.5",
     "@types/jest": "^27.5.2",
+    "@types/jsdom": "^21.1.6",
     "@types/node": "^20.8.9",
     "aws-sdk-client-mock": "^3.0.0",
     "husky": "^8.0.3",
