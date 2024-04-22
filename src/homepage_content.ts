@@ -1,6 +1,6 @@
 import axios from 'axios';
+import { parse } from 'node-html-parser';
 import { Logger } from '@aws-lambda-powertools/logger';
-import { JSDOM } from 'jsdom';
 
 const logger = new Logger({
   logLevel: 'INFO',
@@ -41,10 +41,9 @@ export async function retrieveHomePageContent(): Promise<string> {
   }
 }
 
-// Extract text content from HTML string using jsdom
-function extractTextFromHTML(html: string): string {
-  const dom = new JSDOM(html);
-  return dom.window.document.body.textContent || '';
+function extractTextFromHTML(html: string) {
+  const root = parse(html);
+  return root.querySelector('body')!.textContent;
 }
 
 // Fetch HTML content from a provided URL
