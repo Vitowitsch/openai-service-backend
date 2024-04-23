@@ -56,7 +56,7 @@ export class OpenAiServiceBackendStack extends cdk.Stack {
   }
 
   private createNodejsFunction(lambdaExecutionRole: iam.Role): NodejsFunction {
-    return new NodejsFunction(this, `OpenAIServiceBackendLambda`, {
+    return new NodejsFunction(this, `OpenAiServiceBackendLambda`, {
       entry: 'src/index.ts',
       handler: 'handler',
       runtime: lambda.Runtime.NODEJS_18_X,

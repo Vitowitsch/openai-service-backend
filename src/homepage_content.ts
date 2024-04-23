@@ -9,11 +9,9 @@ const logger = new Logger({
 // Function to handle sending a message
 export async function retrieveHomePageContent(): Promise<string> {
   try {
-    const proxyUrl = 'https://api.allorigins.win/raw?url=';
+    // const proxyUrl = 'https://api.allorigins.win/raw?url=';
     const targetUrl = 'https://www.botsandbytes.de/#';
-    const response = await axios.get<string>(
-      proxyUrl + encodeURIComponent(targetUrl),
-    );
+    const response = await axios.get<string>(targetUrl);
 
     const websiteContent = extractTextFromHTML(response.data);
     const extractedUrls = extractUrlsFromHTML(response.data);
