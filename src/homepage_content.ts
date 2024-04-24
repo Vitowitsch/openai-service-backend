@@ -16,13 +16,16 @@ export async function retrieveHomePageContent(): Promise<string> {
     const websiteContent = extractTextFromHTML(response.data);
     const extractedUrls = extractUrlsFromHTML(response.data);
     let combinedUrlTextContent = '';
-
+    const fetchedUrls: string[] = [];
     for (const url of extractedUrls) {
       try {
         logger.debug(url);
-        const urlHtmlContent = await fetchHtmlContent(url);
-        const urlTextContent = extractTextFromHTML(urlHtmlContent);
-        combinedUrlTextContent += urlTextContent + '\n';
+        if (!fetchedUrls.includes(url)) {
+          const urlHtmlContent = await fetchHtmlContent(url);
+          fetchedUrls.push(url);
+          const urlTextContent = extractTextFromHTML(urlHtmlContent);
+          combinedUrlTextContent += urlTextContent + '\n';
+        }
       } catch (error) {
         logger.error(`Error fetching HTML content for ${url}`);
       }
