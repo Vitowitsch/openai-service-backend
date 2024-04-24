@@ -46,7 +46,7 @@ export type CobrainerSecret = {
 
 // istanbul ignore next
 export async function getAWSSecret<T>(secret_name: string): Promise<T> {
-  logger.info('accessing db credentials');
+  logger.info(`accessing ${secret_name} credentials`);
   const secret = await getSecret(secret_name, {
     transform: Transform.JSON,
   });

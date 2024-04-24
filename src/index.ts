@@ -11,21 +11,22 @@ const logger = new Logger({
 
 interface OpenAiSecret {
   GPT_TOKEN: string;
+  MODEL: string;
 }
 
 export async function handler(event: APIGatewayProxyEvent) {
   logger.info('Received event:', JSON.stringify(event));
   try {
-    const websiteContent = await retrieveHomePageContent();
+    const openAiSecret = await getAWSSecret<OpenAiSecret>('apenai-gpt-token');
 
-    const openaiApiKey = getAWSSecret<OpenAiSecret>('apenai-gpt-token');
+    const websiteContent = await retrieveHomePageContent();
 
     const userMsg = JSON.parse(event.body!).text;
 
     const openaiResponse = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
-        model: 'gpt-4',
+        model: openAiSecret.MODEL,
         max_tokens: 100,
         messages: [
           { role: 'assistant', content: websiteContent },
@@ -35,7 +36,7 @@ export async function handler(event: APIGatewayProxyEvent) {
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${(await openaiApiKey).GPT_TOKEN}`,
+          Authorization: `Bearer ${openAiSecret.GPT_TOKEN}`,
         },
       },
     );

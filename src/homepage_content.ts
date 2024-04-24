@@ -15,8 +15,10 @@ export async function retrieveHomePageContent(): Promise<string> {
 
     const websiteContent = extractTextFromHTML(response.data);
     const extractedUrls = extractUrlsFromHTML(response.data);
+
     let combinedUrlTextContent = '';
     const fetchedUrls: string[] = [];
+
     for (const url of extractedUrls) {
       try {
         logger.debug(url);
@@ -33,6 +35,7 @@ export async function retrieveHomePageContent(): Promise<string> {
 
     const completeWebsiteContent =
       websiteContent + '\n' + combinedUrlTextContent;
+
     logger.debug('Complete website content:', completeWebsiteContent);
 
     return completeWebsiteContent;
