@@ -48,9 +48,7 @@ function extractTextFromHTML(html: string) {
 // Fetch HTML content from a provided URL
 async function fetchHtmlContent(url: string): Promise<string> {
   try {
-    const response = await axios.get<string>(
-      `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    );
+    const response = await axios.get<string>(url);
     return response.data;
   } catch (error) {
     const errMsg = `Error fetching HTML content for ${url}: ${error instanceof Error ? error.message : String(error)}`;
