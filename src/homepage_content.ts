@@ -3,7 +3,7 @@ import { parse } from 'node-html-parser';
 import { Logger } from '@aws-lambda-powertools/logger';
 
 const logger = new Logger({
-  logLevel: 'INFO',
+  logLevel: 'DEBUG',
 });
 
 // Function to handle sending a message
@@ -19,6 +19,7 @@ export async function retrieveHomePageContent(): Promise<string> {
 
     for (const url of extractedUrls) {
       try {
+        logger.debug(url);
         const urlHtmlContent = await fetchHtmlContent(url);
         const urlTextContent = extractTextFromHTML(urlHtmlContent);
         combinedUrlTextContent += urlTextContent + '\n';
