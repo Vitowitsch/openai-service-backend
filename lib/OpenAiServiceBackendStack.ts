@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
@@ -20,7 +21,28 @@ export class OpenAiServiceBackendStack extends cdk.Stack {
       description:
         'used to provide access to the backend to encapsulate the chatgpt token',
       handler: lambdaFct,
+      proxy: false,
     });
+
+    const resource = api.root.addResource('myresource');
+    resource.addMethod('POST', new apigateway.LambdaIntegration(lambdaFct), {
+      authorizationType: apigateway.AuthorizationType.NONE,
+      methodResponses: [
+        {
+          statusCode: '200',
+          responseParameters: {
+            'method.response.header.Access-Control-Allow-Origin': true,
+          },
+        },
+      ],
+    });
+
+    resource.addCorsPreflight({
+      allowOrigins: apigateway.Cors.ALL_ORIGINS,
+      allowMethods: apigateway.Cors.ALL_METHODS,
+      allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
+    });
+
     const endpointName = 'EndpointURL4OpenAiBackend';
     new ssm.StringParameter(this, endpointName, {
       parameterName: endpointName,
