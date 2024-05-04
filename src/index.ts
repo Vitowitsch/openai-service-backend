@@ -18,7 +18,11 @@ export async function handler(event: APIGatewayProxyEvent) {
   logger.info('Received event:', JSON.stringify(event));
   try {
     const openAiSecret = await getAWSSecret<OpenAiSecret>('apenai-gpt-token');
-
+    logger.debug('event:', JSON.stringify(event.body));
+    logger.debug('http method: ' + event.httpMethod);
+    logger.debug('path: ' + event.path);
+    logger.debug('resource: ' + event.resource);
+    logger.debug('event.header:', JSON.stringify(event.headers));
     // const websiteContent = await retrieveHomePageContent();
 
     const userMsg = JSON.parse(event.body!).text;
