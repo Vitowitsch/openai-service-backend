@@ -18,7 +18,7 @@ export async function handler(event: APIGatewayProxyEvent) {
   logger.info('Received event:', JSON.stringify(event));
   try {
     const openAiSecret = await getAWSSecret<OpenAiSecret>('apenai-gpt-token');
-    const { conversationHistory } = JSON.parse(event.body!).text;
+    const { conversationHistory } = JSON.parse(event.body!).conversationHistory;
     const systemMessage = {
       role: 'system',
       content: 'You are a helpful assistant.',
