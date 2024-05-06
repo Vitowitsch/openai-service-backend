@@ -19,12 +19,24 @@ export async function handler(event: APIGatewayProxyEvent) {
   try {
     const openAiSecret = await getAWSSecret<OpenAiSecret>('apenai-gpt-token');
     const { conversationHistory } = JSON.parse(event.body!).conversationHistory;
+    logger.info('Conversation history:', JSON.stringify(conversationHistory));
+    logger.info('Conversation history2:', conversationHistory);
     const systemMessage = {
       role: 'system',
       content: 'You are a helpful assistant.',
     };
 
     const messages = [systemMessage, ...conversationHistory];
+
+    // function addArticlesToContext(articles) {
+    //   articles.forEach((article) => {
+    //     conversationHistory.push({
+    //       role: "assistant",
+    //       content: `Article: ${article.title}\n${article.content}`
+    //     });
+    //   });
+    // }
+    // ...conversationHistory];
 
     const openaiResponse = await axios.post(
       'https://api.openai.com/v1/chat/completions',
