@@ -18,24 +18,20 @@ export async function handler(event: APIGatewayProxyEvent) {
   logger.info('Received event:', JSON.stringify(event));
   try {
     const openAiSecret = await getAWSSecret<OpenAiSecret>('apenai-gpt-token');
-    logger.debug('event:', JSON.stringify(event.body));
-    logger.debug('http method: ' + event.httpMethod);
-    logger.debug('path: ' + event.path);
-    logger.debug('resource: ' + event.resource);
-    logger.debug('event.header:', JSON.stringify(event.headers));
-    // const websiteContent = await retrieveHomePageContent();
+    const { conversationHistory } = JSON.parse(event.body!).text;
+    const systemMessage = {
+      role: 'system',
+      content: 'You are a helpful assistant.',
+    };
 
-    const userMsg = JSON.parse(event.body!).text;
+    const messages = [systemMessage, ...conversationHistory];
 
     const openaiResponse = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
         model: openAiSecret.MODEL,
         max_tokens: 100,
-        messages: [
-          // { role: 'assistant', content: websiteContent },
-          { role: 'user', content: userMsg },
-        ],
+        messages,
       },
       {
         headers: {
