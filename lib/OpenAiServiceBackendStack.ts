@@ -20,6 +20,11 @@ export class OpenAiServiceBackendStack extends cdk.Stack {
       description:
         'used to provide access to the backend to encapsulate the chatgpt token',
       handler: lambdaFct,
+      defaultCorsPreflightOptions: {
+        allowOrigins: ['*'],
+        allowMethods: ['OPTIONS', 'POST', 'GET'],
+        allowHeaders: ['Content-Type', 'Authorization'],
+      },
     });
     const endpointName = 'EndpointURL4OpenAiBackend';
     new ssm.StringParameter(this, endpointName, {
