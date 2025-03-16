@@ -19,7 +19,7 @@ function getCorsHeaders() {
   };
 }
 
-async function handlePreflight(): Promise<APIGatewayProxyResult> {
+function handlePreflight(): APIGatewayProxyResult {
   return {
     statusCode: 200,
     headers: getCorsHeaders(),
