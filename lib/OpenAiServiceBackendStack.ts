@@ -47,7 +47,7 @@ export class OpenAiServiceBackendStack extends cdk.Stack {
       new iam.PolicyStatement({
         actions: ['secretsmanager:GetSecretValue', 'ssm:GetParameter'],
         resources: [
-          'arn:aws:secretsmanager:eu-central-1:944997240237:secret:apenai-gpt-token-y2brc7',
+          'arn:aws:secretsmanager:eu-central-1:944997240237:secret:hpchatbot_secret-4nZybL',
         ],
       }),
     );

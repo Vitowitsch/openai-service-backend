@@ -109,7 +109,7 @@ export async function handler(
 
   try {
     if (event.httpMethod === 'OPTIONS') {
-      return handlePreflight();
+      return Promise.resolve(handlePreflight());
     }
 
     const openai = await getOpenAIClient();
