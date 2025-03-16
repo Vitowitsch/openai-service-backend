@@ -13,7 +13,8 @@ interface OpenAiSecret {
 function getCorsHeaders() {
   return {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+    'Access-Control-Allow-Headers':
+      'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
     'Access-Control-Allow-Methods': 'OPTIONS,POST',
   };
 }
@@ -31,7 +32,10 @@ async function getOpenAIClient(): Promise<OpenAI> {
   return new OpenAI({ apiKey: openAiSecret.API_KEY });
 }
 
-async function getOrCreateThreadId(openai: OpenAI, existingThreadId?: string): Promise<string> {
+async function getOrCreateThreadId(
+  openai: OpenAI,
+  existingThreadId?: string,
+): Promise<string> {
   if (existingThreadId) {
     logger.info(`Reusing existing thread: ${existingThreadId}`);
     return existingThreadId;
@@ -42,12 +46,22 @@ async function getOrCreateThreadId(openai: OpenAI, existingThreadId?: string): P
   return thread.id;
 }
 
-async function startAssistantRun(openai: OpenAI, threadId: string, assistantId: string) {
+async function startAssistantRun(
+  openai: OpenAI,
+  threadId: string,
+  assistantId: string,
+) {
   logger.info(`Starting assistant run for thread: ${threadId}`);
-  return await openai.beta.threads.runs.create(threadId, { assistant_id: assistantId });
+  return await openai.beta.threads.runs.create(threadId, {
+    assistant_id: assistantId,
+  });
 }
 
-async function waitForAssistantResponse(openai: OpenAI, threadId: string, runId: string): Promise<boolean> {
+async function waitForAssistantResponse(
+  openai: OpenAI,
+  threadId: string,
+  runId: string,
+): Promise<boolean> {
   const MAX_RETRIES = 15;
   let retries = 0;
 
@@ -62,24 +76,35 @@ async function waitForAssistantResponse(openai: OpenAI, threadId: string, runId:
     await new Promise((resolve) => setTimeout(resolve, 2000));
   }
 
-  logger.error(`Timeout reached: Assistant did not respond within ${MAX_RETRIES * 2} seconds.`);
+  logger.error(
+    `Timeout reached: Assistant did not respond within ${MAX_RETRIES * 2} seconds.`,
+  );
   return false;
 }
 
-async function fetchLatestAssistantMessage(openai: OpenAI, threadId: string): Promise<string> {
+async function fetchLatestAssistantMessage(
+  openai: OpenAI,
+  threadId: string,
+): Promise<string> {
   const messages = await openai.beta.threads.messages.list(threadId);
-  const assistantMessage = messages.data.find((msg) => msg.role === 'assistant');
+  const assistantMessage = messages.data.find(
+    (msg) => msg.role === 'assistant',
+  );
 
   if (!assistantMessage || !assistantMessage.content.length) {
     return 'No response generated';
   }
 
   return assistantMessage.content
-    .map((content) => ('text' in content ? content.text : '[Unsupported content type]'))
+    .map((content) =>
+      'text' in content ? content.text : '[Unsupported content type]',
+    )
     .join('\n');
 }
 
-export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+export async function handler(
+  event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> {
   logger.info('Received event:', JSON.stringify(event));
 
   try {
@@ -102,9 +127,16 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       };
     }
 
-    await openai.beta.threads.messages.create(threadId, { role: 'user', content: userMessage });
+    await openai.beta.threads.messages.create(threadId, {
+      role: 'user',
+      content: userMessage,
+    });
 
-    const run = await startAssistantRun(openai, threadId, openAiSecret.ASSISTENT_ID);
+    const run = await startAssistantRun(
+      openai,
+      threadId,
+      openAiSecret.ASSISTENT_ID,
+    );
 
     const completed = await waitForAssistantResponse(openai, threadId, run.id);
     if (!completed) {
