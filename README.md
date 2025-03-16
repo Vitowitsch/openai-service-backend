@@ -1,5 +1,11 @@
 # Module Description
 
+## CI/CD
+
+Github acts only as repo, the deployment pipe is implemented in the lib folder and running as AWS Code Pipeline:
+
+![Alt text](image.png)
+
 AWS lambda ecapulating the call to openai-API with token secured in AWS parameter-store (secret-type param).
 
 
