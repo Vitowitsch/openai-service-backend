@@ -1,15 +1,29 @@
-import { APIGatewayProxyEvent } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { Logger } from '@aws-lambda-powertools/logger';
 import OpenAI from 'openai';
 import { getAWSSecret } from './infrastructure';
 
-const logger = new Logger({
-  logLevel: 'DEBUG',
-});
+const logger = new Logger({ logLevel: 'DEBUG' });
 
 interface OpenAiSecret {
   API_KEY: string;
   ASSISTENT_ID: string;
+}
+
+function getCorsHeaders() {
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+    'Access-Control-Allow-Methods': 'OPTIONS,POST',
+  };
+}
+
+async function handlePreflight(): Promise<APIGatewayProxyResult> {
+  return {
+    statusCode: 200,
+    headers: getCorsHeaders(),
+    body: '',
+  };
 }
 
 async function getOpenAIClient(): Promise<OpenAI> {
@@ -17,10 +31,7 @@ async function getOpenAIClient(): Promise<OpenAI> {
   return new OpenAI({ apiKey: openAiSecret.API_KEY });
 }
 
-async function getOrCreateThreadId(
-  openai: OpenAI,
-  existingThreadId?: string,
-): Promise<string> {
+async function getOrCreateThreadId(openai: OpenAI, existingThreadId?: string): Promise<string> {
   if (existingThreadId) {
     logger.info(`Reusing existing thread: ${existingThreadId}`);
     return existingThreadId;
@@ -31,22 +42,12 @@ async function getOrCreateThreadId(
   return thread.id;
 }
 
-async function startAssistantRun(
-  openai: OpenAI,
-  threadId: string,
-  assistantId: string,
-) {
+async function startAssistantRun(openai: OpenAI, threadId: string, assistantId: string) {
   logger.info(`Starting assistant run for thread: ${threadId}`);
-  return await openai.beta.threads.runs.create(threadId, {
-    assistant_id: assistantId,
-  });
+  return await openai.beta.threads.runs.create(threadId, { assistant_id: assistantId });
 }
 
-async function waitForAssistantResponse(
-  openai: OpenAI,
-  threadId: string,
-  runId: string,
-): Promise<boolean> {
+async function waitForAssistantResponse(openai: OpenAI, threadId: string, runId: string): Promise<boolean> {
   const MAX_RETRIES = 15;
   let retries = 0;
 
@@ -61,37 +62,31 @@ async function waitForAssistantResponse(
     await new Promise((resolve) => setTimeout(resolve, 2000));
   }
 
-  logger.error(
-    `Timeout reached: Assistant did not respond within ${MAX_RETRIES * 2} seconds.`,
-  );
+  logger.error(`Timeout reached: Assistant did not respond within ${MAX_RETRIES * 2} seconds.`);
   return false;
 }
 
-async function fetchLatestAssistantMessage(
-  openai: OpenAI,
-  threadId: string,
-): Promise<string> {
+async function fetchLatestAssistantMessage(openai: OpenAI, threadId: string): Promise<string> {
   const messages = await openai.beta.threads.messages.list(threadId);
-  const assistantMessage = messages.data.find(
-    (msg) => msg.role === 'assistant',
-  );
+  const assistantMessage = messages.data.find((msg) => msg.role === 'assistant');
 
   if (!assistantMessage || !assistantMessage.content.length) {
     return 'No response generated';
   }
 
   return assistantMessage.content
-    .map((content) => {
-      if ('text' in content) return content.text; // Placeholder for images
-      return '[Unsupported content type]';
-    })
+    .map((content) => ('text' in content ? content.text : '[Unsupported content type]'))
     .join('\n');
 }
 
-export async function handler(event: APIGatewayProxyEvent) {
+export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   logger.info('Received event:', JSON.stringify(event));
 
   try {
+    if (event.httpMethod === 'OPTIONS') {
+      return handlePreflight();
+    }
+
     const openai = await getOpenAIClient();
     const openAiSecret = await getAWSSecret<OpenAiSecret>('hpchatbot_secret');
 
@@ -102,25 +97,20 @@ export async function handler(event: APIGatewayProxyEvent) {
     if (!userMessage) {
       return {
         statusCode: 400,
+        headers: getCorsHeaders(),
         body: JSON.stringify({ error: 'Missing user input' }),
       };
     }
 
-    await openai.beta.threads.messages.create(threadId, {
-      role: 'user',
-      content: userMessage,
-    });
+    await openai.beta.threads.messages.create(threadId, { role: 'user', content: userMessage });
 
-    const run = await startAssistantRun(
-      openai,
-      threadId,
-      openAiSecret.ASSISTENT_ID,
-    );
+    const run = await startAssistantRun(openai, threadId, openAiSecret.ASSISTENT_ID);
 
     const completed = await waitForAssistantResponse(openai, threadId, run.id);
     if (!completed) {
       return {
         statusCode: 500,
+        headers: getCorsHeaders(),
         body: JSON.stringify({ error: 'Assistant response timeout' }),
       };
     }
@@ -128,18 +118,14 @@ export async function handler(event: APIGatewayProxyEvent) {
     const response = await fetchLatestAssistantMessage(openai, threadId);
     return {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers':
-          'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-        'Access-Control-Allow-Methods': 'OPTIONS,POST',
-      },
+      headers: getCorsHeaders(),
       body: JSON.stringify({ thread_id: threadId, response }),
     };
   } catch (error) {
     logger.error('Error processing request', { error });
     return {
       statusCode: 500,
+      headers: getCorsHeaders(),
       body: JSON.stringify({ error: 'Internal server error' }),
     };
   }
