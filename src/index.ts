@@ -96,14 +96,16 @@ async function fetchLatestAssistantMessage(
   }
 
   return assistantMessage.content
-  .map((content) =>
-    typeof content === 'object' && 'text' in content && typeof content.text === 'object'
-      ? content.text.value
-      : typeof content === 'object' && 'text' in content
-      ? content.text
-      : '[Unsupported content type]'
-  )
-  .join('\n');
+    .map((content) =>
+      typeof content === 'object' &&
+      'text' in content &&
+      typeof content.text === 'object'
+        ? content.text.value
+        : typeof content === 'object' && 'text' in content
+          ? content.text
+          : '[Unsupported content type]',
+    )
+    .join('\n');
 }
 
 export async function handler(
